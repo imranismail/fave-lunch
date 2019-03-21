@@ -35,8 +35,7 @@ class OutletCard extends StatelessWidget {
                       TextSpan(
                         text: ", ${this.distance.round()}m",
                         style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20.0,
+                          fontWeight: FontWeight.normal
                         ),
                       )
                     ],
