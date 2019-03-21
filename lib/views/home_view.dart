@@ -101,7 +101,7 @@ class _HomeViewState extends State<HomeView> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 16.0),
+              padding: const EdgeInsets.all(16.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: <Widget>[
