@@ -9,12 +9,15 @@ class OutletCard extends StatelessWidget {
   final String location;
   final double distance;
   final bool foreground;
+  final int paidCount;
+
   const OutletCard({
     Key key,
     this.images,
     this.name,
     this.location,
     this.distance,
+    this.paidCount,
     this.foreground = true,
   }) : super(key: key);
 
@@ -90,7 +93,7 @@ class OutletCard extends StatelessWidget {
                               color: Colors.white.withOpacity(0.8),
                               fontSize: 16.0),
                           children: [
-                            TextSpan(text: " • 252 Paid"),
+                            TextSpan(text: " • $paidCount Paid"),
                           ],
                         ),
                       ),
@@ -120,13 +123,12 @@ class OutletCardStack extends StatelessWidget {
           child: Transform.scale(
             scale: 1 - (0.1 * 2),
             child: OutletCard(
-              name: "Medifoods",
-              location: "Bangsar South",
-              distance: 500.0,
+              name: "JuiceLab",
+              location: "The Sphere",
+              distance: 350.0,
+              paidCount: 2618,
               images: [
-                "https://image-assets.access.myfave.gdn/attachments/d08b28ffe84b5d36a7d7ed533c4d04b3bc11c7bf/store/fill/800/500/f0c554c776fc2bad1dfea2adceb598d36e5dd4e6bcf64ae942558ded5c2b/Barcook+Bakery+-+main.jpg",
-                "https://image-assets.access.myfave.gdn/attachments/8a152961bae7e78340443844f8e52ff6ca6d6707/store/fill/800/500/e7ff074d4f56ceb38bde11590f64f120875de35bf48250421b66971ff2cf/file.jpg",
-                "https://image-assets.access.myfave.gdn/attachments/973f7c74260a556b03496eb2452b0aa1fafc24b3/store/fill/800/500/900b2145987909dc50ab2a8fb40767b9ccbc52fdf779f6f9b09c3bf8fd60/Khan%27s-main.jpg"
+                "https://image-assets.access.myfave.gdn/attachments/c3b3e3b47e5b2da96d91858f7d68147f1af45d17/store/fill/800/500/43d5dc80128c0b7d0e1cb43dafea7d783acc66b736f0a16b74872b95ad7e/JuiceLab+-+main+new.jpg",
               ],
             ),
           ),
@@ -138,10 +140,9 @@ class OutletCardStack extends StatelessWidget {
             child: OutletCard(
               name: "Barcook Bakery",
               location: "Bangsar South",
-              distance: 500.0,
+              distance: 425.0,
+              paidCount: 16689,
               images: [
-                "https://image-assets.access.myfave.gdn/attachments/973f7c74260a556b03496eb2452b0aa1fafc24b3/store/fill/800/500/900b2145987909dc50ab2a8fb40767b9ccbc52fdf779f6f9b09c3bf8fd60/Khan%27s-main.jpg",
-                "https://image-assets.access.myfave.gdn/attachments/8a152961bae7e78340443844f8e52ff6ca6d6707/store/fill/800/500/e7ff074d4f56ceb38bde11590f64f120875de35bf48250421b66971ff2cf/file.jpg",
                 "https://image-assets.access.myfave.gdn/attachments/d08b28ffe84b5d36a7d7ed533c4d04b3bc11c7bf/store/fill/800/500/f0c554c776fc2bad1dfea2adceb598d36e5dd4e6bcf64ae942558ded5c2b/Barcook+Bakery+-+main.jpg",
               ],
             ),
@@ -155,10 +156,13 @@ class OutletCardStack extends StatelessWidget {
               name: "Khan's",
               location: "Bangsar South",
               distance: 500.0,
+              paidCount: 690,
               images: [
-                "https://image-assets.access.myfave.gdn/attachments/8a152961bae7e78340443844f8e52ff6ca6d6707/store/fill/800/500/e7ff074d4f56ceb38bde11590f64f120875de35bf48250421b66971ff2cf/file.jpg",
-                "https://image-assets.access.myfave.gdn/attachments/d08b28ffe84b5d36a7d7ed533c4d04b3bc11c7bf/store/fill/800/500/f0c554c776fc2bad1dfea2adceb598d36e5dd4e6bcf64ae942558ded5c2b/Barcook+Bakery+-+main.jpg",
-                "https://image-assets.access.myfave.gdn/attachments/973f7c74260a556b03496eb2452b0aa1fafc24b3/store/fill/800/500/900b2145987909dc50ab2a8fb40767b9ccbc52fdf779f6f9b09c3bf8fd60/Khan%27s-main.jpg"
+                "https://image-assets.access.myfave.gdn/attachments/973f7c74260a556b03496eb2452b0aa1fafc24b3/store/fill/800/500/900b2145987909dc50ab2a8fb40767b9ccbc52fdf779f6f9b09c3bf8fd60/Khan%27s-main.jpg",
+                "https://image-assets.access.myfave.gdn/attachments/b183c5669d2f9c0e10f9f0ad9bc048c09a568715/store/fill/800/500/64c2c99991f023ef49f000222b550fcc0dd1eb44984058d1a645ce3de1e0/Khan%27s-3.jpg",
+                "https://image-assets.access.myfave.gdn/attachments/7046794938c5053a4545cadf5109b72c678928f2/store/fill/800/500/715f61515f805783caa41e0ba97f75291e4b6f0c664b374d9ca8b692f90b/Khan%27s-4.jpg",
+                "https://image-assets.access.myfave.gdn/attachments/fc6a94a6ee8fd8ec2e6d06b323bd012834d158b8/store/fill/800/500/b9e0dea65b350586d624301f7a6628fc6f949f8f40a19c02521121442319/Khan%27s-2.jpg",
+                "https://image-assets.access.myfave.gdn/attachments/509ad51f945245bfeaf4fc69df6254da0810d288/store/fill/800/500/f7fef8794d745067019ded4347e32898200889f4f741f729343ee74430f9/Khan%27s-1.jpg",
               ],
             ),
           ),
