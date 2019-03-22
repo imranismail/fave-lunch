@@ -2,6 +2,110 @@ import 'package:flutter/material.dart';
 
 import './images.dart';
 
+class OutletCard extends StatelessWidget {
+  final List<String> images;
+
+  final String name;
+  final String location;
+  final double distance;
+  final bool foreground;
+  const OutletCard({
+    Key key,
+    this.images,
+    this.name,
+    this.location,
+    this.distance,
+    this.foreground = true,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Swipeable(
+      key: GlobalKey(),
+      child: buildCard(),
+    );
+  }
+
+  Widget buildCard() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 48.0),
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(6.0),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(6.0),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Positioned.fill(
+                child: foreground
+                    ? ImageGallery(
+                        srcs: images,
+                        visibleImageIndex: 0,
+                      )
+                    : Image.network(
+                        images[0],
+                        fit: BoxFit.cover,
+                      ),
+              ),
+              Positioned(
+                bottom: 0,
+                right: 0,
+                left: 0,
+                child: Container(
+                  padding: EdgeInsets.all(16.0),
+                  decoration: new BoxDecoration(
+                    gradient: new LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        Colors.black.withOpacity(0.8),
+                      ],
+                    ),
+                  ),
+                  child: Column(
+                    children: <Widget>[
+                      RichText(
+                        text: TextSpan(
+                          text: name,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20.0,
+                          ),
+                          children: [
+                            TextSpan(
+                              text: ", ${distance.round()}m",
+                              style: TextStyle(fontWeight: FontWeight.normal),
+                            )
+                          ],
+                        ),
+                      ),
+                      RichText(
+                        text: TextSpan(
+                          text: location,
+                          style: TextStyle(
+                              color: Colors.white.withOpacity(0.8),
+                              fontSize: 16.0),
+                          children: [
+                            TextSpan(text: " • 252 Paid"),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class OutletCardStack extends StatelessWidget {
   const OutletCardStack({
     Key key,
@@ -64,114 +168,177 @@ class OutletCardStack extends StatelessWidget {
   }
 }
 
-class OutletCard extends StatelessWidget {
-  const OutletCard({
-    Key key,
-    this.images,
-    this.name,
-    this.location,
-    this.distance,
-    this.foreground = true,
+class Swipeable extends StatefulWidget {
+  final Widget child;
+  final Widget background;
+  final double maxAngle;
+
+  Swipeable({
+    @required Key key,
+    @required this.child,
+    this.background,
+    this.maxAngle = 0.05,
   }) : super(key: key);
 
-  final List<String> images;
-  final String name;
-  final String location;
-  final double distance;
-  final bool foreground;
+  @override
+  _SwipeableState createState() => _SwipeableState();
+}
+
+class _SwipeableState extends State<Swipeable> with TickerProviderStateMixin {
+  Animation<Offset> _movementAnimation;
+  AnimationController _movementController;
+  Animation<double> _resizeAnimation;
+  AnimationController _resizeController;
+  Animation<double> _rotationAnimation;
+  AnimationController _rotationController;
+  Size _sizePriorToCollapse;
+  double _movementExtent = 0.0;
+  double _rotationAngle = 0.0;
+  bool _isDragging = false;
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return foreground
-            ? Draggable(
-                child: buildCard(),
-                feedback: Container(
-                  height: constraints.maxHeight,
-                  width: constraints.maxWidth,
-                  child: buildCard(),
-                ),
-                axis: Axis.horizontal,
-                childWhenDragging: Container(),
-              )
-            : buildCard();
-      },
+    if (_resizeAnimation != null) {
+      return SizeTransition(
+        sizeFactor: _resizeAnimation,
+        axis: Axis.vertical,
+        child: SizedBox(
+          width: _sizePriorToCollapse.width,
+          height: _sizePriorToCollapse.height,
+          child: widget.background,
+        ),
+      );
+    }
+
+    return GestureDetector(
+      child: RotationTransition(
+        turns: _rotationAnimation,
+        child: SlideTransition(
+          child: widget.child,
+          position: _movementAnimation,
+        ),
+      ),
+      onHorizontalDragStart: _handleDragStart,
+      onHorizontalDragUpdate: _handleDragUpdate,
+      onHorizontalDragEnd: _handleDragEnd,
     );
   }
 
-  Widget buildCard() {
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(6.0),
+  @override
+  void dispose() {
+    _movementController.dispose();
+    _resizeController?.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _movementController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 325),
+    )..addStatusListener(_handleDismissStatusChanged);
+    _rotationController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 325));
+    _updateAnimation();
+  }
+
+  _handleDismissStatusChanged(AnimationStatus status) async {
+    if (status == AnimationStatus.completed && !_isDragging)
+      _startResizeAnimation();
+  }
+
+  _handleDragEnd(DragEndDetails details) {
+    if (!_isDragging || _movementController.isAnimating) return;
+
+    _isDragging = false;
+
+    if (_movementController.value > 0.4) {
+      _movementController.forward();
+      _rotationController.forward();
+    } else {
+      _movementController.reverse();
+      _rotationController.reverse();
+    }
+  }
+
+  _handleDragStart(DragStartDetails details) {
+    _isDragging = true;
+
+    if (_movementController.isAnimating) {
+      _movementExtent =
+          _movementController.value * context.size.width * _movementExtent.sign;
+      _rotationAngle =
+          _rotationController.value * widget.maxAngle * _movementExtent.sign;
+      _movementController.stop();
+      _rotationController.stop();
+    } else {
+      _movementExtent = 0.0;
+      _rotationAngle = 0.0;
+      _movementController.value = 0.0;
+      _rotationController.value = 0.0;
+    }
+
+    setState(() {
+      _updateAnimation();
+    });
+  }
+
+  _handleDragUpdate(DragUpdateDetails details) {
+    if (!_isDragging || _movementController.isAnimating) return;
+
+    final double oldMovementExtent = _movementExtent;
+    final double oldRotationAngle = _rotationAngle;
+    final double delta = details.primaryDelta;
+
+    _movementExtent += delta;
+    _rotationAngle = widget.maxAngle *
+        (_movementExtent.abs() / context.size.width) *
+        _movementExtent.sign;
+
+    if (oldMovementExtent.sign != _movementExtent.sign ||
+        oldRotationAngle.sign != _rotationAngle.sign) {
+      setState(() {
+        _updateAnimation();
+      });
+    }
+
+    if (!_movementController.isAnimating) {
+      _movementController.value = _movementExtent.abs() / context.size.width;
+      _rotationController.value = _movementExtent.abs() / context.size.width;
+    }
+  }
+
+  _startResizeAnimation() {
+    assert(_movementController != null);
+    assert(_movementController.isCompleted);
+    assert(_resizeController == null);
+    assert(_sizePriorToCollapse == null);
+
+    _resizeController =
+        AnimationController(duration: Duration(milliseconds: 325), vsync: this)
+          ..forward();
+
+    setState(() {
+      _sizePriorToCollapse = context.size;
+      _resizeAnimation = _resizeController.drive(
+        Tween<double>(begin: 1.0, end: 0.0),
+      );
+    });
+  }
+
+  _updateAnimation() {
+    _rotationAnimation = _rotationController.drive(
+      Tween<double>(
+        begin: 0.0,
+        end: widget.maxAngle * _rotationAngle.sign,
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(6.0),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            Positioned.fill(
-              child: foreground
-                  ? ImageGallery(
-                      srcs: images,
-                      visibleImageIndex: 0,
-                    )
-                  : Image.network(
-                      images[0],
-                      fit: BoxFit.cover,
-                    ),
-            ),
-            Positioned(
-              bottom: 0,
-              right: 0,
-              left: 0,
-              child: Container(
-                decoration: new BoxDecoration(
-                  gradient: new LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      Colors.black.withOpacity(0.8),
-                    ],
-                  ),
-                ),
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  children: <Widget>[
-                    RichText(
-                      text: TextSpan(
-                        text: name,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20.0,
-                        ),
-                        children: [
-                          TextSpan(
-                            text: ", ${distance.round()}m",
-                            style: TextStyle(fontWeight: FontWeight.normal),
-                          )
-                        ],
-                      ),
-                    ),
-                    RichText(
-                      text: TextSpan(
-                        text: location,
-                        style: TextStyle(
-                            color: Colors.white.withOpacity(0.8),
-                            fontSize: 16.0),
-                        children: [
-                          TextSpan(text: " • 252 Paid"),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            )
-          ],
-        ),
+    );
+
+    _movementAnimation = _movementController.drive(
+      Tween<Offset>(
+        begin: Offset.zero,
+        end: Offset(_movementExtent.sign, 0.0),
       ),
     );
   }

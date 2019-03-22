@@ -21,10 +21,7 @@ class HomeView extends StatelessWidget {
         child: Column(
           children: <Widget>[
             Flexible(
-              child: Padding(
-                padding: const EdgeInsets.only(top: 36.0),
-                child: OutletCardStack(),
-              ),
+              child: OutletCardStack(),
             ),
             Padding(
               padding: const EdgeInsets.all(16.0),

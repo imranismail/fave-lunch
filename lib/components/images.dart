@@ -93,7 +93,7 @@ class _ImageGalleryState extends State<ImageGallery> {
           left: 0.0,
           right: 0.0,
           child: SelectedImageIndicator(
-            ImageCount: widget.srcs.length,
+            imageCount: widget.srcs.length,
             visibleImageIndex: visibleImageIndex,
           ),
         ),
@@ -106,11 +106,11 @@ class _ImageGalleryState extends State<ImageGallery> {
 }
 
 class SelectedImageIndicator extends StatelessWidget {
-  final int ImageCount;
+  final int imageCount;
   final int visibleImageIndex;
 
   SelectedImageIndicator({
-    this.ImageCount,
+    this.imageCount,
     this.visibleImageIndex,
   });
 
@@ -154,9 +154,11 @@ class SelectedImageIndicator extends StatelessWidget {
 
   List<Widget> _buildIndicators() {
     List<Widget> indicators = [];
-    for (int i = 0; i < ImageCount; ++i) {
+    for (int i = 0; i < imageCount; ++i) {
       indicators.add(
-        i == visibleImageIndex ? _buildActiveIndicator() : _buildInactiveIndicator(),
+        i == visibleImageIndex
+            ? _buildActiveIndicator()
+            : _buildInactiveIndicator(),
       );
     }
     return indicators;
