@@ -1,23 +1,25 @@
 import 'package:flutter/material.dart';
 
 class ActionButton extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final double size;
+
   const ActionButton({
     Key key,
     this.icon,
     this.color,
+    this.size: 48,
   }) : super(key: key);
-
-  final IconData icon;
-  final Color color;
 
   @override
   Widget build(BuildContext context) {
     return RawMaterialButton(
       onPressed: () {},
       child: Icon(
-        this.icon,
-        color: this.color,
-        size: 48.0,
+        icon,
+        color: color,
+        size: size,
       ),
       shape: CircleBorder(),
       fillColor: Colors.white,

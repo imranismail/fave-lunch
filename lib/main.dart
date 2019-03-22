@@ -8,7 +8,7 @@ class FaveLunch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Jom Lunch',
+      title: 'FaveLunch',
       theme: ThemeData(
         // This is the theme of your application.
         //
