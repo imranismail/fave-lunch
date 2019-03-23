@@ -176,25 +176,28 @@ class Swipeable extends StatefulWidget {
   _SwipeableState createState() => _SwipeableState();
 }
 
-class _SwipeableState extends State<Swipeable> with SingleTickerProviderStateMixin {
+class _SwipeableState extends State<Swipeable>
+    with SingleTickerProviderStateMixin {
   Offset _dragStartPosition = Offset.zero;
   Offset _dragPosition = Offset.zero;
   Offset _cardPosition = Offset.zero;
-  AnimationController _animation;
+  AnimationController _controller;
+  Animation<double> _animation;
 
   Matrix4 getTransform(BoxConstraints constraints) {
     double rotation = 0.0;
-    
+
     if (_dragStartPosition != null) {
       final topOffset = 100;
-      final dragStartedFromTop = _dragStartPosition.dy >=
-          (constraints.maxHeight / 2) + topOffset;
+      final dragStartedFromTop =
+          _dragStartPosition.dy >= (constraints.maxHeight / 2) + topOffset;
       final sign = dragStartedFromTop ? -1 : 1;
       rotation = (_cardPosition.dx / constraints.maxWidth) * 0.325 * sign;
     }
 
     return Matrix4.identity()
-      ..translate(_cardPosition.dx * _animation.value, _cardPosition.dy * _animation.value)
+      ..translate(_cardPosition.dx * _animation.value,
+          _cardPosition.dy * _animation.value)
       ..rotateZ(rotation * _animation.value);
   }
 
@@ -204,7 +207,7 @@ class _SwipeableState extends State<Swipeable> with SingleTickerProviderStateMix
       child: LayoutBuilder(
         builder: (context, constraints) {
           return AnimatedBuilder(
-            animation: _animation,
+            animation: _controller,
             child: widget.child,
             builder: (context, child) {
               return Transform(
@@ -223,31 +226,39 @@ class _SwipeableState extends State<Swipeable> with SingleTickerProviderStateMix
 
   @override
   void dispose() {
-    _animation.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
   @override
   void initState() {
     super.initState();
-    _animation = AnimationController(
+
+    _controller = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 200),
+      duration: Duration(milliseconds: 1200),
+    );
+
+    _animation = Tween(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.elasticOut,
+      ),
     );
   }
 
   void _onPanStart(DragStartDetails details) {
-    if (_animation.isAnimating) _animation.stop(canceled: true);
+    if (_controller.isAnimating) _controller.stop(canceled: true);
     _dragStartPosition = details.globalPosition;
   }
 
   void _onPanUpdate(DragUpdateDetails details) {
     _dragPosition = details.globalPosition;
     _cardPosition = _dragPosition - _dragStartPosition;
-    _animation.value = 1.0;
+    _controller.reset();
   }
 
   void _onPanEnd(DragEndDetails details) {
-    _animation.reverse();
+    _controller.forward();
   }
 }
