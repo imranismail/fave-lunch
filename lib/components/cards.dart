@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 
 import './images.dart';
@@ -183,9 +181,12 @@ class _SwipeableState extends State<Swipeable>
   Offset _cardPosition = Offset.zero;
   AnimationController _controller;
   Animation<double> _animation;
+  Tween<double> _slideBackTween = Tween(begin: 1.0, end: 0.0);
+  Tween<double> _slideOutTween;
 
   Matrix4 getTransform(BoxConstraints constraints) {
     double rotation = 0.0;
+    double factor = _animation?.value ?? 1.0;
 
     if (_dragStartPosition != null) {
       final topOffset = 100;
@@ -196,9 +197,8 @@ class _SwipeableState extends State<Swipeable>
     }
 
     return Matrix4.identity()
-      ..translate(_cardPosition.dx * _animation.value,
-          _cardPosition.dy * _animation.value)
-      ..rotateZ(rotation * _animation.value);
+      ..translate(_cardPosition.dx * factor, _cardPosition.dy * factor)
+      ..rotateZ(rotation * factor);
   }
 
   @override
@@ -238,13 +238,6 @@ class _SwipeableState extends State<Swipeable>
       vsync: this,
       duration: Duration(milliseconds: 1200),
     );
-
-    _animation = Tween(begin: 1.0, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.elasticOut,
-      ),
-    );
   }
 
   void _onPanStart(DragStartDetails details) {
@@ -259,6 +252,29 @@ class _SwipeableState extends State<Swipeable>
   }
 
   void _onPanEnd(DragEndDetails details) {
-    _controller.forward();
+    final isHorizontalSwipe =
+        (_cardPosition.dx / context.size.width).abs() > 0.45;
+    final isVerticalSwipe =
+        (_cardPosition.dy / context.size.height).abs() > 0.45;
+    final horizontalSlideoutFactor =
+        (context.size.width / _cardPosition.dx).abs();
+    final verticalSlideoutFactor =
+        (context.size.height / _cardPosition.dy).abs();
+    final primarySlideoutFactor =
+        isHorizontalSwipe ? horizontalSlideoutFactor : verticalSlideoutFactor;
+    final slideoutOffscreenFactor = primarySlideoutFactor * 1.5;
+
+    if (isHorizontalSwipe || isVerticalSwipe) {
+      _slideOutTween = Tween(begin: 1.0, end: slideoutOffscreenFactor);
+      _animation = _controller.drive(_slideOutTween);
+      _controller.fling();
+    } else {
+      _animation = _controller.drive(
+        _slideBackTween.chain(
+          CurveTween(curve: Curves.elasticOut),
+        ),
+      );
+      _controller.forward();
+    }
   }
 }
